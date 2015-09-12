@@ -1,6 +1,6 @@
 {
   "name": "redux-optimist",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Optimistically apply actions that can be later commited or reverted.",
   "keywords": [],
   "dependencies": {},
