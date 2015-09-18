@@ -219,6 +219,9 @@ test('real world example', () => {
         optimist: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
       };
     },
+    begin(transactionID) {
+      return {type: 'BEGIN', optimist: {type: optimist.BEGIN, id: transactionID}};
+    },
     commit(transactionID) {
       return {type: 'COMMIT', optimist: {type: optimist.COMMIT, id: transactionID}};
     },
@@ -229,10 +232,13 @@ test('real world example', () => {
   let actions = [
     {action: {type: '@@init'}, value: 0},
     {action: actionCreators.set(2), value: 2},
+    {action: actionCreators.begin('start-at-1'), value: 2},
     {action: actionCreators.set(1, 'start-at-1'), value: 1},
     {action: actionCreators.incrementIfEven(), value: 1},
-    {action: actionCreators.increment('inc'), value: 2},
-    {action: actionCreators.commit('inc'), value: 2},
+    {action: actionCreators.increment('start-at-1'), value: 2},
+    {action: actionCreators.begin('inc'), value: 2},
+    {action: actionCreators.increment('inc'), value: 3},
+    {action: actionCreators.commit('inc'), value: 3},
     {action: actionCreators.revert('start-at-1'), value: 4},
   ];
   let state;
