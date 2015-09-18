@@ -204,19 +204,19 @@ test('real world example', () => {
       return {
         type: 'SET',
         value: value,
-        optimist: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
+        optimist: transactionID ? {id: transactionID} : undefined
       };
     },
     increment(transactionID) {
       return {
         type: 'INCREMENT',
-        optimist: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
+        optimist: transactionID ? {id: transactionID} : undefined
       };
     },
     incrementIfEven(transactionID) {
       return {
         type: 'INCREMENT_IF_EVEN',
-        optimist: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
+        optimist: transactionID ? {id: transactionID} : undefined
       };
     },
     begin(transactionID) {
