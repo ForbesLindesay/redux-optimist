@@ -40,7 +40,12 @@ function optimist(fn) {
     if (Object.keys(optimist).length) {
       let newOptimist = {};
       Object.keys(optimist).forEach(function (key) {
-        newOptimist[key] = {state: optimist[key].state, actions: optimist[key].actions.concat([action])};
+	if (action.optimist && action.optimist.id == key) {
+          newOptimist[key] = optimist[key];
+	}
+	else {
+          newOptimist[key] = {state: optimist[key].state, actions: optimist[key].actions.concat([action])};
+	}
       });
       optimist = newOptimist;
     }
