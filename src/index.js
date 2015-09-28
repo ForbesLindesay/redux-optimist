@@ -46,7 +46,7 @@ function optimist(fn) {
       }
     });
     if (!committed) {
-      console.error('Cannot commit transaction with id "my-transaction" because it does not exist');
+      console.error('Cannot commit transaction with id "' + action.optimist.id + '" because it does not exist');
     }
     optimist = newOptimist;
     return baseReducer(optimist, innerState, action);
@@ -85,7 +85,7 @@ function optimist(fn) {
       }
     });
     if (!gotInitialState) {
-      console.error('Cannot revert transaction with id "my-transaction" because it does not exist');
+      console.error('Cannot revert transaction with id "' + action.optimist.id + '" because it does not exist');
     }
     optimist = newOptimist;
     return baseReducer(optimist, currentState, action);
