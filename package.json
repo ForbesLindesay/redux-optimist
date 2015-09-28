@@ -1,17 +1,21 @@
 {
   "name": "redux-optimist",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Optimistically apply actions that can be later commited or reverted.",
   "keywords": [],
   "dependencies": {},
   "devDependencies": {
     "babel": "^5.8.23",
+    "babel-istanbul": "^0.3.20",
+    "chalk": "^1.1.1",
+    "diff": "^2.1.2",
     "testit": "^2.0.2"
   },
   "scripts": {
     "prepublish": "npm run build",
     "build": "babel src --out-dir lib",
-    "test": "babel-node test/index.js"
+    "test": "babel-node test/index.js",
+    "coverage": "babel-node node_modules/.bin/babel-istanbul cover test/index.js"
   },
   "repository": {
     "type": "git",

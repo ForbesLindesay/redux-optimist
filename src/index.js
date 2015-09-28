@@ -3,92 +3,139 @@
 var BEGIN = 'BEGIN';
 var COMMIT = 'COMMIT';
 var REVERT = 'REVERT';
-var INITIAL_OPTIMIST = {};
+// Array({transactionID: string or null, beforeState: {object}, action: {object}}
+var INITIAL_OPTIMIST = [];
 
 module.exports = optimist;
 module.exports.BEGIN = BEGIN;
 module.exports.COMMIT = COMMIT;
 module.exports.REVERT = REVERT;
 function optimist(fn) {
+  function beginReducer(state, action) {
+    let {optimist, innerState} = separateState(state);
+    optimist = optimist.concat([{beforeState: innerState, action}]);
+    innerState = fn(innerState, action);
+    validateState(innerState, action);
+    return {optimist, ...innerState};
+  }
+  function commitReducer(state, action) {
+    let {optimist, innerState} = separateState(state);
+    var newOptimist = [], started = false, committed = false;
+    optimist.forEach(function (entry) {
+      if (started) {
+        if (
+          entry.beforeState &&
+          matchesTransaction(entry.action, action.optimist.id)
+        ) {
+          committed = true;
+          newOptimist.push({action: entry.action});
+        } else {
+          newOptimist.push(entry);
+        }
+      } else if (
+        entry.beforeState &&
+        !matchesTransaction(entry.action, action.optimist.id)
+      ) {
+        started = true;
+        newOptimist.push(entry);
+      } else if (
+        entry.beforeState &&
+        matchesTransaction(entry.action, action.optimist.id)
+      ) {
+        committed = true;
+      }
+    });
+    if (!committed) {
+      console.error('Cannot commit transaction with id "my-transaction" because it does not exist');
+    }
+    optimist = newOptimist;
+    return baseReducer(optimist, innerState, action);
+  }
+  function revertReducer(state, action) {
+    let {optimist, innerState} = separateState(state);
+    var newOptimist = [], started = false, gotInitialState = false, currentState = innerState;
+    optimist.forEach(function (entry) {
+      if (
+        entry.beforeState &&
+        matchesTransaction(entry.action, action.optimist.id)
+      ) {
+        currentState = entry.beforeState;
+        gotInitialState = true;
+      }
+      if (!matchesTransaction(entry.action, action.optimist.id)) {
+        if (
+          entry.beforeState
+        ) {
+          started = true;
+        }
+        if (started) {
+          if (gotInitialState && entry.beforeState) {
+            newOptimist.push({
+              beforeState: currentState,
+              action: entry.action
+            });
+          } else {
+            newOptimist.push(entry);
+          }
+        }
+        if (gotInitialState) {
+          currentState = fn(currentState, entry.action);
+          validateState(innerState, action);
+        }
+      }
+    });
+    if (!gotInitialState) {
+      console.error('Cannot revert transaction with id "my-transaction" because it does not exist');
+    }
+    optimist = newOptimist;
+    return baseReducer(optimist, currentState, action);
+  }
+  function baseReducer(optimist, innerState, action) {
+    if (optimist.length) {
+      optimist = optimist.concat([{action}]);
+    }
+    innerState = fn(innerState, action);
+    validateState(innerState, action);
+    return {optimist, ...innerState};
+  }
   return function (state, action) {
-    let {optimist = INITIAL_OPTIMIST, ...oldState} = (state || {});
-    let oldOptimist = optimist;
-    if (!state) oldState = undefined;
-    if (
-      action.optimist &&
-      (action.optimist.type === COMMIT || action.optimist.type === REVERT)
-    ) {
-      let {[action.optimist.id]: transaction, ...transactions} = optimist;
-      if (!transaction) {
-        console.error(
-          'Cannot ' +
-          action.optimist.type +
-          ' transaction with id "' +
-          action.optimist.id +
-          '" because it does not exist'
-        );
-      }
-      optimist = transactions;
-      if (transaction && action.optimist.type === REVERT) {
-        let {state, actions} = transaction;
-        actions.forEach(function (action) {
-          state = fn(state, action);
-        });
-        oldState = state;
+    if (action.optimist) {
+      switch (action.optimist.type) {
+        case BEGIN:
+          return beginReducer(state, action);
+        case COMMIT:
+          return commitReducer(state, action);
+        case REVERT:
+          return revertReducer(state, action);
       }
     }
-    if (Object.keys(optimist).length) {
-      let newOptimist = {};
-      Object.keys(optimist).forEach(function (key) {
-        newOptimist[key] = {state: optimist[key].state, actions: optimist[key].actions.concat([action])};
-      });
-      optimist = newOptimist;
-    }
-    if (action.optimist && action.optimist.type === BEGIN) {
-      if (action.optimist.id in optimist) {
-        console.error(
-          'Implicitly committing transaction with id "' +
-          action.optimist.id +
-          '" because it already exists, and you are starting' +
-          ' it again.'
-        );
-      }
-      if (!state) {
-        console.error(
-          'You should never begin an optimistic transaction before initializing your store.' +
-          ' You would have nothing to revert to!'
-        );
-      }
-      optimist = {
-        ...optimist,
-        [action.optimist.id]: {state: oldState, actions: []}
-      };
-    }
-    let newState = fn(oldState, action);
-    if (!newState || typeof newState !== 'object' || Array.isArray(newState)) {
-      throw new TypeError(
-        'Error while handling "' +
-        action.type +
-        '": Optimist requires that state is always a plain object.'
-      );
-    }
-    if (oldOptimist !== optimist || !equal(newState, oldState)) return {optimist, ...newState};
-    else return state;
+    let separated = separateState(state);
+    return baseReducer(separated.optimist, separated.innerState, action);
   };
 }
 
-function equal(newState, oldState) {
-  if (newState === oldState) return true;
-  if (!(newState && oldState)) return false;
-  for (let key in newState) {
-    if (newState[key] !== oldState[key]) {
-      return false;
-    }
+function matchesTransaction(action, id) {
+  return (
+    action.optimist &&
+    action.optimist.id === id
+  );
+}
+
+function validateState(newState, action) {
+  if (!newState || typeof newState !== 'object' || Array.isArray(newState)) {
+    throw new TypeError(
+      'Error while handling "' +
+      action.type +
+      '": Optimist requires that state is always a plain object.'
+    );
   }
-  for (let key in oldState) {
-    if (newState[key] !== oldState[key]) {
-      return false;
-    }
+}
+
+function separateState(state) {
+  if (!state) {
+    return {optimist: INITIAL_OPTIMIST, innerState: state};
+  } else {
+    let {optimist = INITIAL_OPTIMIST, ...innerState} = state;
+    return {optimist, innerState};
   }
-  return true;
 }
