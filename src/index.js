@@ -22,27 +22,19 @@ function optimist(fn) {
     let {optimist, innerState} = separateState(state);
     var newOptimist = [], started = false, committed = false;
     optimist.forEach(function (entry) {
-      if (started) {
-        if (
-          entry.beforeState &&
-          matchesTransaction(entry.action, action.optimist.id)
-        ) {
+      if (matchesTransaction(entry.action, action.optimist.id)) {
+        if (entry.beforeState) {
           committed = true;
-          newOptimist.push({action: entry.action});
-        } else {
-          newOptimist.push(entry);
+          entry = {action: entry.action} // Strip beforeState - we're never going to need to revert to it.
         }
-      } else if (
-        entry.beforeState &&
-        !matchesTransaction(entry.action, action.optimist.id)
-      ) {
-        started = true;
+      }
+      else {
+        if (entry.beforeState) {
+          started = true; // We're in an open transaction, start recording all entries
+        }
+      }
+      if (started) {
         newOptimist.push(entry);
-      } else if (
-        entry.beforeState &&
-        matchesTransaction(entry.action, action.optimist.id)
-      ) {
-        committed = true;
       }
     });
     if (!committed) {
