@@ -66,7 +66,7 @@ have to use `Redux.combineReducers`.
 #### `middleware/api.js`
 
 ```js
-import {BEGIN, COMMIT, REVERT} from 'optimist';
+import {BEGIN, COMMIT, REVERT} from 'redux-optimist';
 import request from 'then-request';
 
 let nextTransactionID = 0;
