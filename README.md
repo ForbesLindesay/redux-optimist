@@ -3,7 +3,7 @@
 Optimistically apply actions that can be later commited or reverted.
 
 [![Build Status](https://img.shields.io/travis/ForbesLindesay/redux-optimist/master.svg)](https://travis-ci.org/ForbesLindesay/redux-optimist)
-[![Dependency Status](https://img.shields.io/gemnasium/ForbesLindesay/redux-optimist.svg)](https://gemnasium.com/ForbesLindesay/redux-optimist)
+[![Dependency Status](https://img.shields.io/david/ForbesLindesay/redux-optimist.svg)](https://david-dm.org/ForbesLindesay/redux-optimist)
 [![NPM version](https://img.shields.io/npm/v/redux-optimist.svg)](https://www.npmjs.org/package/redux-optimist)
 
 ## Installation
