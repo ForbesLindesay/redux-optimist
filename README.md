@@ -113,7 +113,8 @@ import { createStore, applyMiddleware } from 'redux';
 import api from './middleware/api';
 import reducer from './reducers';
 
-let store = applyMiddleware(api)(createStore)(reducer);
+// Note: passing middleware as the last argument to createStore requires redux@>=3.1.0
+let store = createStore(reducer, applyMiddleware(api));
 console.log(store.getState());
 // {
 //   optimist: {...},
