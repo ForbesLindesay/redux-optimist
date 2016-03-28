@@ -6,6 +6,9 @@ import {diffLines} from 'diff';
 import chalk from 'chalk';
 import optimist from '../src';
 
+const CUSTOM_KEY = 'myOptimist';
+const DEFAULT_KEY = 'optimist';
+
 function deepEqual(expected, actual) {
   expected = JSON.stringify(expected, null, '  ');
   actual = JSON.stringify(actual, null, '  ');
@@ -48,7 +51,7 @@ test('errors and warnings', () => {
     assert.deepEqual(res, {optimist: [], lastAction: action});
   });
   test('when you attempt to commit a non-existent transaction it warns', () => {
-    let action = {type: 'foo', optimist: {type: optimist.COMMIT, id: 'my-transaction'}};
+    let action = {type: 'foo', [DEFAULT_KEY]: {type: optimist.COMMIT, id: 'my-transaction'}};
     let res;
     let warnings = getWarnings(() => {
       res = optimist(function (state, a) {
@@ -64,7 +67,7 @@ test('errors and warnings', () => {
     assert.deepEqual(res, {optimist: {}, lastAction: action});
   });
   test('when you attempt to revert a non-existent transaction it warns', () => {
-    let action = {type: 'foo', optimist: {type: optimist.REVERT, id: 'my-transaction'}};
+    let action = {type: 'foo', [DEFAULT_KEY]: {type: optimist.REVERT, id: 'my-transaction'}};
     let res;
     let warnings = getWarnings(() => {
       res = optimist(function (state, a) {
@@ -84,15 +87,15 @@ test('errors and warnings', () => {
 basic('beginning a transaction', {
   reducer: (state, a) => ({lastAction: a}),
   before: {initial: 'state'},
-  action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}},
+  action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}},
   after: {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       }
     ],
-    lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+    lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
   }
 });
 basic('within a transaction', {
@@ -101,17 +104,17 @@ basic('within a transaction', {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       }
     ],
-    lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+    lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
   },
   action: {type: 'foo'},
   after: {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {action: {type: 'foo'}}
     ],
@@ -124,24 +127,24 @@ basic('nest a transaction', {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       }
     ],
-    lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+    lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
   },
-  action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}},
+  action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}},
   after: {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {
-        beforeState: {lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}},
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        beforeState: {lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}},
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
     ],
-    lastAction: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+    lastAction: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
   }
 });
 basic('revert a transaction', {
@@ -150,27 +153,27 @@ basic('revert a transaction', {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {
-        beforeState: {lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}},
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        beforeState: {lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}},
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
     ],
-    lastAction: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+    lastAction: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
   },
-  action: {type: 'foo', optimist: {type: optimist.REVERT, id: 'my-transaction'}},
+  action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.REVERT, id: 'my-transaction'}},
   after: {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
       {
-        action: {type: 'foo', optimist: {type: optimist.REVERT, id: 'my-transaction'}},
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.REVERT, id: 'my-transaction'}},
       }
     ],
-    lastAction: {type: 'foo', optimist: {type: optimist.REVERT, id: 'my-transaction'}},
+    lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.REVERT, id: 'my-transaction'}},
   }
 });
 basic('revert other transaction', {
@@ -179,27 +182,27 @@ basic('revert other transaction', {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {
-        beforeState: {lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}},
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        beforeState: {lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}},
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
     ],
-    lastAction: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+    lastAction: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
   },
-  action: {type: 'foo', optimist: {type: optimist.REVERT, id: 'my-other-transaction'}},
+  action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.REVERT, id: 'my-other-transaction'}},
   after: {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {
-        action: {type: 'foo', optimist: {type: optimist.REVERT, id: 'my-other-transaction'}},
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.REVERT, id: 'my-other-transaction'}},
       }
     ],
-    lastAction: {type: 'foo', optimist: {type: optimist.REVERT, id: 'my-other-transaction'}},
+    lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.REVERT, id: 'my-other-transaction'}},
   }
 });
 basic('commit a transaction', {
@@ -208,27 +211,27 @@ basic('commit a transaction', {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {
-        beforeState: {lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}},
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        beforeState: {lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}},
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
     ],
-    lastAction: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+    lastAction: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
   },
-  action: {type: 'foo', optimist: {type: optimist.COMMIT, id: 'my-transaction'}},
+  action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.COMMIT, id: 'my-transaction'}},
   after: {
     optimist: [
       {
-        beforeState: {lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}},
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        beforeState: {lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}},
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
       {
-        action: {type: 'foo', optimist: {type: optimist.COMMIT, id: 'my-transaction'}},
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.COMMIT, id: 'my-transaction'}},
       }
     ],
-    lastAction: {type: 'foo', optimist: {type: optimist.COMMIT, id: 'my-transaction'}},
+    lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.COMMIT, id: 'my-transaction'}},
   }
 });
 basic('commit other transaction', {
@@ -237,30 +240,30 @@ basic('commit other transaction', {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {
-        beforeState: {lastAction: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}},
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        beforeState: {lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}},
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
     ],
-    lastAction: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+    lastAction: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
   },
-  action: {type: 'foo', optimist: {type: optimist.COMMIT, id: 'my-other-transaction'}},
+  action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.COMMIT, id: 'my-other-transaction'}},
   after: {
     optimist: [
       {
         beforeState: {initial: 'state'},
-        action: {type: 'foo', optimist: {type: optimist.BEGIN, id: 'my-transaction'}}
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-transaction'}}
       },
       {
-        action: {type: 'bar', optimist: {type: optimist.BEGIN, id: 'my-other-transaction'}}
+        action: {type: 'bar', [CUSTOM_KEY]: {type: optimist.BEGIN, id: 'my-other-transaction'}}
       },
       {
-        action: {type: 'foo', optimist: {type: optimist.COMMIT, id: 'my-other-transaction'}},
+        action: {type: 'foo', [CUSTOM_KEY]: {type: optimist.COMMIT, id: 'my-other-transaction'}},
       }
     ],
-    lastAction: {type: 'foo', optimist: {type: optimist.COMMIT, id: 'my-other-transaction'}},
+    lastAction: {type: 'foo', [CUSTOM_KEY]: {type: optimist.COMMIT, id: 'my-other-transaction'}},
   }
 });
 
@@ -284,26 +287,26 @@ test('real world example', () => {
       return {
         type: 'SET',
         value: value,
-        optimist: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
+        [DEFAULT_KEY]: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
       };
     },
     increment(transactionID) {
       return {
         type: 'INCREMENT',
-        optimist: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
+        [DEFAULT_KEY]: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
       };
     },
     incrementIfEven(transactionID) {
       return {
         type: 'INCREMENT_IF_EVEN',
-        optimist: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
+        [DEFAULT_KEY]: transactionID ? {type: optimist.BEGIN, id: transactionID} : undefined
       };
     },
     commit(transactionID) {
-      return {type: 'COMMIT', optimist: {type: optimist.COMMIT, id: transactionID}};
+      return {type: 'COMMIT', [DEFAULT_KEY]: {type: optimist.COMMIT, id: transactionID}};
     },
     revert(transactionID) {
-      return {type: 'REVERT', optimist: {type: optimist.REVERT, id: transactionID}};
+      return {type: 'REVERT', [DEFAULT_KEY]: {type: optimist.REVERT, id: transactionID}};
     },
   };
   let actions = [
@@ -336,35 +339,35 @@ test('real world example 2', () => {
         return state;
     }
   }
-  let reducer = optimist(originalReducer);
+  let reducer = optimist(originalReducer, action => action[CUSTOM_KEY]);
   let actionCreators = {
     set(value, transactionID) {
       return {
         type: 'SET',
         value: value,
-        optimist: transactionID ? {id: transactionID} : undefined
+        [CUSTOM_KEY]: transactionID ? {id: transactionID} : undefined
       };
     },
     increment(transactionID) {
       return {
         type: 'INCREMENT',
-        optimist: transactionID ? {id: transactionID} : undefined
+        [CUSTOM_KEY]: transactionID ? {id: transactionID} : undefined
       };
     },
     incrementIfEven(transactionID) {
       return {
         type: 'INCREMENT_IF_EVEN',
-        optimist: transactionID ? {id: transactionID} : undefined
+        [CUSTOM_KEY]: transactionID ? {id: transactionID} : undefined
       };
     },
     begin(transactionID) {
-      return {type: 'BEGIN', optimist: {type: optimist.BEGIN, id: transactionID}};
+      return {type: 'BEGIN', [CUSTOM_KEY]: {type: optimist.BEGIN, id: transactionID}};
     },
     commit(transactionID) {
-      return {type: 'COMMIT', optimist: {type: optimist.COMMIT, id: transactionID}};
+      return {type: 'COMMIT', [CUSTOM_KEY]: {type: optimist.COMMIT, id: transactionID}};
     },
     revert(transactionID) {
-      return {type: 'REVERT', optimist: {type: optimist.REVERT, id: transactionID}};
+      return {type: 'REVERT', [CUSTOM_KEY]: {type: optimist.REVERT, id: transactionID}};
     },
   };
   let actions = [
@@ -401,7 +404,7 @@ function basic(name, {reducer, before, action, after}) {
       assert(a === action, 'action should be passed through to reducer');
       */
       return reducer(state, a);
-    })(before, action);
+    }, action => action[CUSTOM_KEY])(before, action);
     deepEqual(res, after);
   });
 }
