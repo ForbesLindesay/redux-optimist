@@ -10,7 +10,7 @@ module.exports = optimist;
 module.exports.BEGIN = BEGIN;
 module.exports.COMMIT = COMMIT;
 module.exports.REVERT = REVERT;
-function optimist(fn) {
+function optimist(fn, mapActionToOptimist = action => action.optimist) {
   function beginReducer(state, action) {
     let {optimist, innerState} = separateState(state);
     optimist = optimist.concat([{beforeState: innerState, action}]);
@@ -20,12 +20,13 @@ function optimist(fn) {
   }
   function commitReducer(state, action) {
     let {optimist, innerState} = separateState(state);
+    const optimistAction = mapActionToOptimist(action);
     var newOptimist = [], started = false, committed = false;
     optimist.forEach(function (entry) {
       if (started) {
         if (
           entry.beforeState &&
-          matchesTransaction(entry.action, action.optimist.id)
+          matchesTransaction(entry.action, optimistAction.id)
         ) {
           committed = true;
           newOptimist.push({action: entry.action});
@@ -34,35 +35,36 @@ function optimist(fn) {
         }
       } else if (
         entry.beforeState &&
-        !matchesTransaction(entry.action, action.optimist.id)
+        !matchesTransaction(entry.action, optimistAction.id)
       ) {
         started = true;
         newOptimist.push(entry);
       } else if (
         entry.beforeState &&
-        matchesTransaction(entry.action, action.optimist.id)
+        matchesTransaction(entry.action, optimistAction.id)
       ) {
         committed = true;
       }
     });
     if (!committed) {
-      console.error('Cannot commit transaction with id "' + action.optimist.id + '" because it does not exist');
+      console.error('Cannot commit transaction with id "' + optimistAction.id + '" because it does not exist');
     }
     optimist = newOptimist;
     return baseReducer(optimist, innerState, action);
   }
   function revertReducer(state, action) {
     let {optimist, innerState} = separateState(state);
+    const optimistAction = mapActionToOptimist(action);
     var newOptimist = [], started = false, gotInitialState = false, currentState = innerState;
     optimist.forEach(function (entry) {
       if (
         entry.beforeState &&
-        matchesTransaction(entry.action, action.optimist.id)
+        matchesTransaction(entry.action, optimistAction.id)
       ) {
         currentState = entry.beforeState;
         gotInitialState = true;
       }
-      if (!matchesTransaction(entry.action, action.optimist.id)) {
+      if (!matchesTransaction(entry.action, optimistAction.id)) {
         if (
           entry.beforeState
         ) {
@@ -85,7 +87,7 @@ function optimist(fn) {
       }
     });
     if (!gotInitialState) {
-      console.error('Cannot revert transaction with id "' + action.optimist.id + '" because it does not exist');
+      console.error('Cannot revert transaction with id "' + optimistAction.id + '" because it does not exist');
     }
     optimist = newOptimist;
     return baseReducer(optimist, currentState, action);
@@ -98,9 +100,17 @@ function optimist(fn) {
     validateState(innerState, action);
     return {optimist, ...innerState};
   }
+  function matchesTransaction(action, id) {
+    const optimistAction = mapActionToOptimist(action);
+    return (
+      optimistAction &&
+      optimistAction.id === id
+    );
+  }
   return function (state, action) {
-    if (action.optimist) {
-      switch (action.optimist.type) {
+    const optimistAction = mapActionToOptimist(action);
+    if (optimistAction) {
+      switch (optimistAction.type) {
         case BEGIN:
           return beginReducer(state, action);
         case COMMIT:
@@ -112,13 +122,6 @@ function optimist(fn) {
     let separated = separateState(state);
     return baseReducer(separated.optimist, separated.innerState, action);
   };
-}
-
-function matchesTransaction(action, id) {
-  return (
-    action.optimist &&
-    action.optimist.id === id
-  );
 }
 
 function validateState(newState, action) {
