@@ -1,7 +1,7 @@
 {
   "name": "redux-optimist",
   "version": "0.0.2",
-  "description": "Optimistically apply actions that can be later commited or reverted.",
+  "description": "Optimistically apply actions that can be later committed or reverted.",
   "keywords": [],
   "dependencies": {},
   "devDependencies": {
