@@ -1,6 +1,6 @@
 # redux-optimist
 
-Optimistically apply actions that can be later commited or reverted.
+Optimistically apply actions that can be later committed or reverted.
 
 [![Build Status](https://img.shields.io/travis/ForbesLindesay/redux-optimist/master.svg)](https://travis-ci.org/ForbesLindesay/redux-optimist)
 [![Dependency Status](https://img.shields.io/david/ForbesLindesay/redux-optimist.svg)](https://david-dm.org/ForbesLindesay/redux-optimist)
@@ -99,8 +99,8 @@ export default function (store) {
 };
 ```
 
-Note how we always follow up by either COMMITing the transaction or REVERTing it.  If you do neither, you will get a memory leak.  Also note that we use a serialisable transactionID such as a number.  These should always
-be unique accross the entire system.
+Note how we always follow up by either Committing the transaction or REVERTing it.  If you do neither, you will get a memory leak.  Also note that we use a serialisable transactionID such as a number.  These should always
+be unique across the entire system.
 
 ### Step 3:
 
