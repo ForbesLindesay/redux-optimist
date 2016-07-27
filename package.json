@@ -5,8 +5,11 @@
   "keywords": [],
   "dependencies": {},
   "devDependencies": {
-    "babel": "^5.8.23",
-    "babel-istanbul": "^0.3.20",
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.11.4",
+    "babel-istanbul": "^0.11.0",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-preset-es2015": "^6.9.0",
     "chalk": "^1.1.1",
     "diff": "^2.1.2",
     "testit": "^2.0.2"
@@ -14,7 +17,7 @@
   "scripts": {
     "prepublish": "npm run build",
     "build": "babel src --out-dir lib",
-    "test": "babel-node test/index.js",
+    "test": "node -r babel-register test/index.js",
     "coverage": "babel-node node_modules/.bin/babel-istanbul cover test/index.js"
   },
   "repository": {
