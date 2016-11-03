@@ -21,6 +21,10 @@
     "type": "git",
     "url": "https://github.com/ForbesLindesay/redux-optimist.git"
   },
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "author": "ForbesLindesay",
   "license": "MIT"
 }
