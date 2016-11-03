@@ -5,18 +5,25 @@ var COMMIT = 'COMMIT';
 var REVERT = 'REVERT';
 // Array({transactionID: string or null, beforeState: {object}, action: {object}}
 var INITIAL_OPTIMIST = [];
+var defaultOptions = {
+  separateState, combineState, validateState,
+};
 
 module.exports = optimist;
 module.exports.BEGIN = BEGIN;
 module.exports.COMMIT = COMMIT;
 module.exports.REVERT = REVERT;
-function optimist(fn) {
+function optimist(fn, options) {
+  let {
+    separateState, combineState, validateState
+  } = Object.assign({}, defaultOptions, options);
+
   function beginReducer(state, action) {
     let {optimist, innerState} = separateState(state);
     optimist = optimist.concat([{beforeState: innerState, action}]);
     innerState = fn(innerState, action);
     validateState(innerState, action);
-    return {optimist, ...innerState};
+    return combineState(optimist, innerState);
   }
   function commitReducer(state, action) {
     let {optimist, innerState} = separateState(state);
@@ -96,7 +103,7 @@ function optimist(fn) {
     }
     innerState = fn(innerState, action);
     validateState(innerState, action);
-    return {optimist, ...innerState};
+    return combineState(optimist, innerState);
   }
   return function (state, action) {
     if (action.optimist) {
@@ -138,4 +145,8 @@ function separateState(state) {
     let {optimist = INITIAL_OPTIMIST, ...innerState} = state;
     return {optimist, innerState};
   }
+}
+
+function combineState(optimist, innerState) {
+  return {optimist, ...innerState};
 }
