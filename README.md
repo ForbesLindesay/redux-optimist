@@ -1,5 +1,7 @@
 # redux-optimist
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ForbesLindesay/redux-optimist.svg)](https://greenkeeper.io/)
+
 Optimistically apply actions that can be later commited or reverted.
 
 [![Build Status](https://img.shields.io/travis/ForbesLindesay/redux-optimist/master.svg)](https://travis-ci.org/ForbesLindesay/redux-optimist)
