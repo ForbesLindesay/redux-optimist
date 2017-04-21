@@ -7,6 +7,7 @@
   "devDependencies": {
     "babel": "^5.8.23",
     "babel-istanbul": "^0.3.20",
+    "babel-preset-env": "^1.4.0",
     "chalk": "^1.1.1",
     "diff": "^2.1.2",
     "testit": "^2.0.2"
