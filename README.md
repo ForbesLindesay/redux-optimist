@@ -6,6 +6,10 @@ Optimistically apply actions that can be later commited or reverted.
 [![Dependency Status](https://img.shields.io/david/ForbesLindesay/redux-optimist.svg)](https://david-dm.org/ForbesLindesay/redux-optimist)
 [![NPM version](https://img.shields.io/npm/v/redux-optimist.svg)](https://www.npmjs.org/package/redux-optimist)
 
+<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/redux-optimist'>
+  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/redux-optimist.svg' />
+</a>
+
 ## Installation
 
     npm install redux-optimist
