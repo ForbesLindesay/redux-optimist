@@ -1,3 +1,4 @@
 {
-  "optional": ["es7.objectRestSpread"]
+  "presets": ["import-export"],
+  "plugins": ["transform-object-rest-spread"]
 }

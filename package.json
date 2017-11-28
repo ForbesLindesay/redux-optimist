@@ -3,9 +3,12 @@
   "version": "0.0.2",
   "description": "Optimistically apply actions that can be later commited or reverted.",
   "keywords": [],
-  "dependencies": {},
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-import-export": "^1.0.2"
+  },
   "devDependencies": {
-    "babel": "^5.8.23",
     "babel-istanbul": "^0.3.20",
     "chalk": "^1.1.1",
     "diff": "^2.1.2",
