@@ -6,9 +6,10 @@
   "dependencies": {},
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-import-export": "^1.0.2",
     "babel-istanbul": "^0.3.20",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-import-export": "^1.0.2",
     "chalk": "^1.1.1",
     "diff": "^2.1.2",
     "testit": "^2.0.2"
