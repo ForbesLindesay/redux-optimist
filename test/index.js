@@ -388,8 +388,7 @@ test('real world example 2', () => {
 });
 
 test('unhandled action state reference', () => {
-  let state = {};
-  let originalReducer = () => state;
+  let originalReducer = ( state = {} ) => state;
   let reducer = optimist(originalReducer);
   let initState = reducer(undefined, {type: '@@init'});
   let originalState = reducer(initState, {type: 'UNHANDLED_ACTION'});
