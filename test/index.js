@@ -264,6 +264,17 @@ basic('commit other transaction', {
   }
 });
 
+test('omits optimist from original reducer', () => {
+  function originalReducer(state = {value: 0}, action) {
+    assert(state.value === 0);
+    assert(!state.hasOwnProperty('optimist'));
+    return state;
+  }
+  let reducer = optimist(originalReducer);
+  let state;
+  state = reducer(state, {type: 'foo'});
+  state = reducer(state, {type: 'foo'});
+});
 
 test('real world example', () => {
   function originalReducer(state = {value: 0}, action) {
