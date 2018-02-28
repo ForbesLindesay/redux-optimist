@@ -109,8 +109,17 @@ function optimist(fn) {
           return revertReducer(state, action);
       }
     }
-    let separated = separateState(state);
-    return baseReducer(separated.optimist, separated.innerState, action);
+    if (!state || !state.optimist || state.optimist.length) {
+      let separated = separateState(state);
+      return baseReducer(separated.optimist, separated.innerState, action);      
+    }
+    let nextState = fn(state, action);
+    if (nextState === state) {
+      return state;
+    }
+    validateState(nextState, action);
+    nextState.optimist = state.optimist;
+    return nextState;
   };
 }
 

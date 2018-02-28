@@ -387,6 +387,15 @@ test('real world example 2', () => {
   assert.deepEqual(state, {optimist: [], value: 4});
 });
 
+test('unhandled action state reference', () => {
+  let state = {};
+  let originalReducer = () => state;
+  let reducer = optimist(originalReducer);
+  let initState = reducer(undefined, {type: '@@init'});
+  let originalState = reducer(initState, {type: 'UNHANDLED_ACTION'});
+  let nextState = reducer(originalState, {type: 'UNHANDLED_ACTION'});
+  assert.strictEqual(originalState, nextState);
+});
 
 function basic(name, {reducer, before, action, after}) {
   test(name, () => {
