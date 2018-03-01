@@ -398,12 +398,25 @@ test('real world example 2', () => {
   assert.deepEqual(state, {optimist: [], value: 4});
 });
 
+test('calls original reducer max of one time per action', () => {
+  let calls = 0;
+  function originalReducer(state) {
+    calls++;
+    return {};
+  }
+  let reducer = optimist(originalReducer);
+  let state;
+  state = reducer(state, {type: '@@init'});
+  state = reducer(state, {type: 'foo'});
+  assert.equal(calls, 2);
+});
+
 test('unhandled action state reference', () => {
-  let originalReducer = ( state = {} ) => state;
+  let originalReducer = (state = {}) => state;
   let reducer = optimist(originalReducer);
   let initState = reducer(undefined, {type: '@@init'});
-  let originalState = reducer(initState, {type: 'UNHANDLED_ACTION'});
-  let nextState = reducer(originalState, {type: 'UNHANDLED_ACTION'});
+  let originalState = reducer(initState, {type: 'foo'});
+  let nextState = reducer(originalState, {type: 'foo'});
   assert.strictEqual(originalState, nextState);
 });
 

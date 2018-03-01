@@ -111,11 +111,13 @@ function optimist(fn) {
     }
 
     let {optimist, innerState} = separateState(state);
-    if (state) {
+    if (state && !optimist.length) {
       let nextState = fn(innerState, action);
-      if (nextState === innerState && !optimist.length) {
+      if (nextState === innerState) {
         return state;
       }
+      validateState(nextState, action);
+      return {optimist, ...nextState};
     }
     return baseReducer(optimist, innerState, action);
   };
