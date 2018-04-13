@@ -22,27 +22,19 @@ function optimist(fn) {
     let {optimist, innerState} = separateState(state);
     var newOptimist = [], started = false, committed = false;
     optimist.forEach(function (entry) {
-      if (started) {
-        if (
-          entry.beforeState &&
-          matchesTransaction(entry.action, action.optimist.id)
-        ) {
+      if (matchesTransaction(entry.action, action.optimist.id)) {
+        if (entry.beforeState) {
           committed = true;
-          newOptimist.push({action: entry.action});
-        } else {
-          newOptimist.push(entry);
+          entry = {action: entry.action} // Strip beforeState - we're never going to need to revert to it.
         }
-      } else if (
-        entry.beforeState &&
-        !matchesTransaction(entry.action, action.optimist.id)
-      ) {
-        started = true;
+      }
+      else {
+        if (entry.beforeState) {
+          started = true; // We're in an open transaction, start recording all entries
+        }
+      }
+      if (started) {
         newOptimist.push(entry);
-      } else if (
-        entry.beforeState &&
-        matchesTransaction(entry.action, action.optimist.id)
-      ) {
-        committed = true;
       }
     });
     if (!committed) {
@@ -52,39 +44,34 @@ function optimist(fn) {
     return baseReducer(optimist, innerState, action);
   }
   function revertReducer(state, action) {
-    let {optimist, innerState} = separateState(state);
-    var newOptimist = [], started = false, gotInitialState = false, currentState = innerState;
+    let {optimist, ...ignore} = separateState(state);
+    var newOptimist = [], started = false, currentState = undefined;
     optimist.forEach(function (entry) {
-      if (
-        entry.beforeState &&
-        matchesTransaction(entry.action, action.optimist.id)
-      ) {
-        currentState = entry.beforeState;
-        gotInitialState = true;
-      }
-      if (!matchesTransaction(entry.action, action.optimist.id)) {
-        if (
-          entry.beforeState
-        ) {
-          started = true;
+      if (matchesTransaction(entry.action, action.optimist.id)) {
+        if (entry.beforeState) {
+          currentState = entry.beforeState;
         }
-        if (started) {
-          if (gotInitialState && entry.beforeState) {
-            newOptimist.push({
+      }
+      else {
+        if (entry.beforeState) {
+          started = true;
+          if (currentState) {
+            entry = {
               beforeState: currentState,
               action: entry.action
-            });
-          } else {
-            newOptimist.push(entry);
+            };
           }
         }
-        if (gotInitialState) {
+        if (started) {
+          newOptimist.push(entry);
+        }
+        if (currentState) {
           currentState = fn(currentState, entry.action);
-          validateState(innerState, action);
+          validateState(currentState, action);
         }
       }
     });
-    if (!gotInitialState) {
+    if (currentState==null) {
       console.error('Cannot revert transaction with id "' + action.optimist.id + '" because it does not exist');
     }
     optimist = newOptimist;
